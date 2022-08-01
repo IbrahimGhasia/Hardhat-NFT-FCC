@@ -2,7 +2,8 @@ const { ethers } = require("hardhat")
 
 const networkConfig = {
     31337: {
-        name: "hardhat",
+        name: "localhost",
+        // subscriptionId: "588",
         ethUsdPriceFeed: "0x9326BFA02ADD2366b30bacB125260Af641031331",
         gasLane: "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc", // 30 gwei
         mintFee: ethers.utils.parseEther("0.01"), // 0.01 ETH
@@ -18,11 +19,12 @@ const networkConfig = {
         callbackGasLimit: "500000", // 500,000 gas
         mintFee: "10000000000000000", // 0.01 ETH
         subscriptionId: "8857", // add your ID here!
+        timeout: 5000000,
     },
 }
 
 const DECIMALS = "18"
-const INITIAL_PRICE = "200000000000000000000"
+const INITIAL_PRICE = ethers.utils.parseUnits("2000", "ether")
 const developmentChains = ["hardhat", "localhost"]
 
 module.exports = {

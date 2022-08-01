@@ -25,7 +25,7 @@ let tokenUris = [
 
 const FUND_AMOUNT = "1000000000000000000000" // 10 LINK
 
-module.exports = async function ({ getNamedAccounts, deployments }) {
+module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy, log } = deployments
     const { deployer } = await getNamedAccounts()
     const chainId = network.config.chainId
@@ -45,9 +45,9 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
         const vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock")
         vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address
         const tx = await vrfCoordinatorV2Mock.createSubscription()
-        const txReceipt = await tx.wait(1)
+        const txReceipt = await tx.wait()
         subscriptionId = txReceipt.events[0].args.subId
-        console.log(txReceipt.events[0].args.subId)
+        console.log(subscriptionId)
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
     } else {
         vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2
@@ -55,13 +55,14 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     }
 
     log("------------------------------------")
-    const args = [
+    console.log(subscriptionId)
+    args = [
         vrfCoordinatorV2Address,
         subscriptionId,
-        networkConfig[chainId].gasLane,
-        networkConfig[chainId].callbackGasLimit,
+        networkConfig[chainId]["gasLane"],
+        networkConfig[chainId]["callbackGasLimit"],
         tokenUris,
-        networkConfig[chainId].mintFee,
+        networkConfig[chainId]["mintFee"],
     ]
 
     const randomIpfsNft = await deploy("RandomIpfsNft", {

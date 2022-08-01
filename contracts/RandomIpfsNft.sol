@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
@@ -43,7 +43,7 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint256 public s_tokenCounter;
     uint256 internal constant MAX_CHANCE_VALUE = 100;
     string[] internal s_dogTokeUris;
-    uint256 internal immutable i_mintFee;
+    uint256 private i_mintFee;
 
     // Events
     event NftRequested(uint256 indexed requestId, address requester);
@@ -60,9 +60,9 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;
+        i_mintFee = mintFee;
         i_callbackGasLimit = callbackGasLimit;
         s_dogTokeUris = dogTokenUris;
-        i_mintFee = mintFee;
     }
 
     function requestNft() public payable returns (uint256 requestId) {
@@ -84,13 +84,13 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         address dogOwner = s_requestIdToSender[requestId];
         uint256 newTokenId = s_tokenCounter;
         // What does this token look like?
+        s_tokenCounter = s_tokenCounter + 1;
         uint256 moddedRng = randomWords[0] % MAX_CHANCE_VALUE;
         // Range of Random Numbers : 0 - 99
         // Eg.  7 -> PUG
         //      12 -> Shiba Inu
         //      88 -> St. Bernard
         Breed dogBreed = getBreedFromModdedRng(moddedRng);
-        s_tokenCounter += s_tokenCounter;
         _safeMint(dogOwner, newTokenId);
         _setTokenURI(newTokenId, s_dogTokeUris[uint256(dogBreed)]);
         emit NftMinted(dogBreed, dogOwner);
@@ -104,17 +104,19 @@ contract RandomIpfsNft is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         }
     }
 
-    function getBreedFromModdedRng(uint256 moddedRng) public view returns (Breed) {
+    function getBreedFromModdedRng(uint256 moddedRng) public pure returns (Breed) {
         uint256 cumulativeSum = 0;
         uint256[3] memory chanceArray = getChanceArray();
         // moddedRng = 25
         // i = 0
         // cumulativeSum = 0
         for (uint256 i = 0; i < chanceArray.length; i++) {
-            if (moddedRng >= cumulativeSum && moddedRng < cumulativeSum + chanceArray[i]) {
+            // if (moddedRng >= cumulativeSum && moddedRng < cumulativeSum + chanceArray[i]) {
+            if (moddedRng >= cumulativeSum && moddedRng < chanceArray[i]) {
                 return Breed(i);
             }
-            cumulativeSum += chanceArray[i];
+            // cumulativeSum += chanceArray[i];
+            cumulativeSum = chanceArray[i];
         }
         revert RandomIpfsNft__RangeOutOfBounds();
     }
